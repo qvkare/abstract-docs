@@ -32,41 +32,37 @@ Install the `foundryup-zksync` fork:
 curl -L https://raw.githubusercontent.com/matter-labs/foundry-zksync/main/install-foundry-zksync | bash
 ```
 
-Run `foundryup-zksync` to install the latest versions of the `forge` and `cast` binaries:
+Run `foundryup-zksync` to install `forge`, `cast`, and `anvil`:
 
 ```bash
 foundryup-zksync
 ```
 
-<Accordion title="Common installation issues" icon="circle-exclamation">
-  
-  <AccordionGroup>
-      <Accordion title="Could not detect shell">
-      To add the `foundry` binary to your PATH, run the following command:
-      ```
-      export PATH="$PATH:/Users/<your-username-here>/.foundry/bin"
-      ```
-      Replace `<your-username-here>` with the correct path to your home directory.
-      </Accordion>
-      <Accordion title="Library not loaded: libusb" >
-       The [libusb](https://libusb.info/) library may need to be installed manually on MacOS.
-       Run the following command to install the library:
-       ```bash
-       brew install libusb
-      ```
-      </Accordion>
-  </AccordionGroup>
-</Accordion>
+You may need to restart your terminal session after installation to continue.
 
-A successful installation will output the following message:
-
-```bash
-foundryup-zksync: installed - forge 0.0.2
-foundryup-zksync: installed - cast 0.0.2
-foundryup-zksync: done!
-```
-
+  <Accordion title="Common installation issues" icon="circle-exclamation">
+    <AccordionGroup>
+        <Accordion title="foundryup-zksync: command not found">
+          Restart your terminal session.
+        </Accordion>
+        <Accordion title="Could not detect shell">
+        To add the `foundry` binary to your PATH, run the following command:
+        ```
+        export PATH="$PATH:/Users/<your-username-here>/.foundry/bin"
+        ```
+        Replace `<your-username-here>` with the correct path to your home directory.
+        </Accordion>
+        <Accordion title="Library not loaded: libusb" >
+        The [libusb](https://libusb.info/) library may need to be installed manually on MacOS.
+        Run the following command to install the library:
+        ```bash
+        brew install libusb
+        ```
+        </Accordion>
+    </AccordionGroup>
+  </Accordion>
   </Step>
+
   <Step title="Verify installation">
 
     A helpful command to check if the installation was successful is:
@@ -75,8 +71,7 @@ foundryup-zksync: done!
     forge build --help | grep -A 20 "ZKSync configuration:"
     ```
 
-    If successful, it will output `20` lines of the available
-    options included in the `foundry-zksync` fork.
+    If installed successfully, 20 lines of `--zksync` options will be displayed.
 
   </Step>
 </Steps>
@@ -194,9 +189,8 @@ Verification was successful.
   </Step>
   <Step title="Verify an existing smart contract" icon="check">
 
-In the above step, we verified the smart contract immediately after deployment.
-
-To verify an existing smart contract on the [block explorer](/tooling/block-explorers), run the following command:
+In the previous command, we verified the smart contract immediately after deployment.
+However, if you need to verify an existing smart contract, run the following command:
 
 ```bash
 forge verify-contract 0x1590522E5758a7A8DD00f212fe487AE94fE69dcf \
