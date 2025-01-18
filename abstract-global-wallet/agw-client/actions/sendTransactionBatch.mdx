@@ -19,41 +19,72 @@ in a single call using the connected Abstract Global Wallet.
 
 <CodeGroup>
 
-```tsx example.ts
-import { agwClient } from "./config";
-import { getGeneralPaymasterInput } from "viem/zksync";
 
-const transactionHash = await agwClient.sendTransactionBatch({
-  calls: [
-    {
-      to: "0x273B3527BF5b607dE86F504fED49e1582dD2a1C6",
-      data: "0x69",
-    },
-    {
-      to: "0x273B3527BF5b607dE86F504fED49e1582dD2a1C6",
-      data: "0x1337",
-    },
-  ],
-  paymaster: "0x5407B5040dec3D339A9247f3654E59EEccbb6391",
-  paymasterInput: getGeneralPaymasterInput({
-    innerInput: "0x",
-  }),
-});
+```tsx Example.tsx
+import { useAbstractClient } from "@abstract-foundation/agw-react";
+import { getGeneralPaymasterInput } from "viem/zksync";
+import { encodeFunctionData, parseUnits } from "viem";
+import { ROUTER_ADDRESS, TOKEN_ADDRESS, WETH_ADDRESS, PAYMASTER_ADDRESS, routerAbi, erc20Abi } from "./config";
+
+export default function SendTransactionBatch() {
+  const { data: agwClient } = useAbstractClient();
+
+  async function sendTransactionBatch() {
+    if (!agwClient) return;
+
+    // Batch an approval and a swap in a single call
+    const hash = await agwClient.sendTransactionBatch({
+      calls: [
+        // 1 - Approval
+        {
+          to: TOKEN_ADDRESS,
+          args: [ROUTER_ADDRESS, parseUnits("100", 18)],
+          data: encodeFunctionData({
+            abi: erc20Abi,
+            functionName: "approve",
+            args: [ROUTER_ADDRESS, parseUnits("100", 18)],
+          }),
+        },
+        // 2 - Swap
+        {
+          to: ROUTER_ADDRESS,
+          data: encodeFunctionData({
+            abi: routerAbi,
+            functionName: "swapExactTokensForETH",
+            args: [
+              parseUnits("100", 18),
+              BigInt(0),
+              [TOKEN_ADDRESS, WETH_ADDRESS],
+              agwClient.account.address,
+              BigInt(Math.floor(Date.now() / 1000) + 60 * 20),
+            ],
+          }),
+        },
+      ],
+      paymaster: PAYMASTER_ADDRESS,
+      paymasterInput: getGeneralPaymasterInput({
+        innerInput: "0x",
+      }),
+    });
+  }
+}
 ```
 
 ```tsx config.ts
-import { createAbstractClient } from "@abstract-foundation/agw-client";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { abstractTestnet } from "viem/chains";
+import { parseAbi } from "viem";
 
-// As an example, we are creating a new dummy account here for the signer.
-const randomPrivateKey = generatePrivateKey(); // Make a random private key
-const account = privateKeyToAccount(randomPrivateKey); // Use that to create a signer
+export const ROUTER_ADDRESS = "0x07551c0Daf6fCD9bc2A398357E5C92C139724Ef3";
+export const TOKEN_ADDRESS = "0xdDD0Fb7535A71CD50E4B8735C0c620D6D85d80d5"; 
+export const WETH_ADDRESS = "0x9EDCde0257F2386Ce177C3a7FCdd97787F0D841d";
+export const PAYMASTER_ADDRESS = "0x5407B5040dec3D339A9247f3654E59EEccbb6391";
 
-export const agwClient = await createAbstractClient({
-  chain: abstractTestnet,
-  signer: account, // The "owner" (initial approved signer) of the AGW smart contract wallet.
-});
+export const routerAbi = parseAbi([
+  "function swapExactTokensForETH(uint256,uint256,address[],address,uint256) external"
+]);
+
+export const erc20Abi = parseAbi([
+  "function approve(address,uint256) external"
+]);
 ```
 
 </CodeGroup>

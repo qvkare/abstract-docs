@@ -10,42 +10,28 @@ It extends the [deployContract](https://viem.sh/zksync/actions/deployContract) f
 
 ## Usage
 
-<CodeGroup>
-
-```tsx example.ts
-import { contractAbi, contractBytecode } from "./const";
-import { agwClient } from "./config";
+```tsx
+import { useAbstractClient } from "@abstract-foundation/agw-react";
+import { erc20Abi } from "viem"; // example abi
 import { abstractTestnet } from "viem/chains";
 
-const hash = await agwClient.deployContract({
-  abi: contractAbi,
-  bytecode: contractBytecode,
-  chain: abstractTestnet,
-  account: agwClient.account,
-});
+export default function DeployContract() {
+    const { data: agwClient } = useAbstractClient();
+
+    async function deployContract() {
+        if (!agwClient) return;
+
+        const hash = await agwClient.deployContract({
+            abi: erc20Abi, // Your smart contract ABI
+            account: agwClient.account,
+            bytecode: "0x...", // Your smart contract bytecode
+            chain: abstractTestnet,
+            args: [], // Constructor arguments
+        });
+    }
+}
+
 ```
-
-```tsx const.ts
-export const contractAbi = []; // Your contract ABI
-export const contractBytecode = "0x..."; // Your contract bytecode
-```
-
-```tsx config.ts
-import { createAbstractClient } from "@abstract-foundation/agw-client";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { abstractTestnet } from "viem/chains";
-
-// As an example, we are creating a new dummy account here for the signer.
-const randomPrivateKey = generatePrivateKey(); // Make a random private key
-const account = privateKeyToAccount(randomPrivateKey); // Use that to create a signer
-
-export const agwClient = await createAbstractClient({
-  chain: abstractTestnet,
-  signer: account, // The "owner" (initial approved signer) of the AGW smart contract wallet.
-});
-```
-
-</CodeGroup>
 
 ## Parameters
 
